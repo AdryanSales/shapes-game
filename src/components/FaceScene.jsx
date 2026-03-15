@@ -12,21 +12,12 @@ export default function FaceScene({ placedShapes, wrongSlotId }) {
 
   return (
     <svg
-      viewBox="0 0 400 450"
+      viewBox="0 0 400 430"
       className="scene-svg"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Background */}
-      <rect width="400" height="450" fill="#FFF9E6" />
-
-      {/* Head outline (decorative oval) */}
-      <ellipse
-        cx="200" cy="250"
-        rx="160" ry="195"
-        fill="#FFE0B2"
-        stroke="#FFCA28"
-        strokeWidth="4"
-      />
+      {/* White background */}
+      <rect width="400" height="430" fill="#ffffff" />
 
       {/* Droppable slots */}
       <DroppableSlot
@@ -64,8 +55,17 @@ export default function FaceScene({ placedShapes, wrongSlotId }) {
       {scene.slots.map(slot => {
         if (placedShapes[slot.id]) return null
         let lx, ly
-        if (slot.cx !== undefined) { lx = slot.cx; ly = slot.cy + 5 }
-        else if (slot.points) {
+        if (slot.labelY !== undefined) {
+          ly = slot.labelY
+          if (slot.cx !== undefined) {
+            lx = slot.cx
+          } else if (slot.points) {
+            const pts = slot.points.split(' ').map(p => p.split(',').map(Number))
+            lx = pts.reduce((s, p) => s + p[0], 0) / pts.length
+          }
+        } else if (slot.cx !== undefined) {
+          lx = slot.cx; ly = slot.cy + 5
+        } else if (slot.points) {
           const pts = slot.points.split(' ').map(p => p.split(',').map(Number))
           lx = pts.reduce((s, p) => s + p[0], 0) / pts.length
           ly = pts.reduce((s, p) => s + p[1], 0) / pts.length + 5

@@ -1,6 +1,6 @@
 import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { RiArrowGoBackLine } from 'react-icons/ri'
-import DiePanel from './DiePanel.jsx'
+import DicePanel from './DicePanel.jsx'
 import HouseScene from './HouseScene.jsx'
 import FaceScene from './FaceScene.jsx'
 import ShapeSVG from './ShapeSVG.jsx'
@@ -12,8 +12,10 @@ export default function GameScreen({
   usedPieceIds,
   activeId,
   wrongSlotId,
+  currentDicePiece,
   handleDragStart,
   handleDragEnd,
+  handleRoll,
   onBack,
 }) {
   const sensors = useSensors(
@@ -32,9 +34,9 @@ export default function GameScreen({
       <div className="game-screen">
         <button className="back-button" onClick={onBack}><RiArrowGoBackLine /> Voltar</button>
         <div className="game-die-col">
-          <DiePanel
-            pieces={currentScene.pieces}
-            usedPieceIds={usedPieceIds}
+          <DicePanel
+            currentDicePiece={currentDicePiece}
+            onRoll={handleRoll}
           />
         </div>
         <div className="game-scene-col">

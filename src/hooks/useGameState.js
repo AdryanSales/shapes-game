@@ -8,6 +8,7 @@ export function useGameState() {
   const [usedPieceIds, setUsedPieceIds] = useState(new Set())
   const [activeId, setActiveId] = useState(null) // piece being dragged
   const [wrongSlotId, setWrongSlotId] = useState(null)
+  const [currentDicePiece, setCurrentDicePiece] = useState(null)
 
   const currentScene = activeScene ? SCENES[activeScene] : null
 
@@ -29,6 +30,7 @@ export function useGameState() {
     setUsedPieceIds(new Set())
     setActiveId(null)
     setWrongSlotId(null)
+    setCurrentDicePiece(null)
     setPhase('playing')
   }, [])
 
@@ -39,7 +41,16 @@ export function useGameState() {
     setUsedPieceIds(new Set())
     setActiveId(null)
     setWrongSlotId(null)
+    setCurrentDicePiece(null)
   }, [])
+
+  const handleRoll = useCallback((shapeType) => {
+    if (!currentScene) return
+    const piece = currentScene.pieces.find(
+      p => p.type === shapeType && !usedPieceIds.has(p.id)
+    )
+    setCurrentDicePiece(piece ?? null)
+  }, [currentScene, usedPieceIds])
 
   const handleDragStart = useCallback(({ active }) => {
     setActiveId(active.id)
@@ -74,6 +85,7 @@ export function useGameState() {
     // Success
     setPlacedShapes(prev => ({ ...prev, [slotId]: pieceId }))
     setUsedPieceIds(prev => new Set([...prev, pieceId]))
+    setCurrentDicePiece(null)
   }, [currentScene, placedShapes, usedPieceIds])
 
   return {
@@ -85,9 +97,11 @@ export function useGameState() {
     activeId,
     wrongSlotId,
     isWon,
+    currentDicePiece,
     selectScene,
     resetGame,
     handleDragStart,
     handleDragEnd,
+    handleRoll,
   }
 }

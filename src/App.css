@@ -28,14 +28,14 @@ html, body, #root {
   justify-content: center;
   gap: 18px;
   padding: 20px;
-  background: linear-gradient(160deg, #FFF8E1 0%, #FFE082 100%);
+  background: linear-gradient(160deg, #7f81ff 0%, #1598d4 100%);
 }
 
 .start-title {
   font-size: clamp(2rem, 5vw, 3rem);
-  color: var(--primary);
-  text-shadow: 3px 3px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1);
-  letter-spacing: 1px;
+  font-family: 'Nunito';
+  font-weight: bolder;
+  color: #3f0086;
 }
 
 .start-subtitle {
@@ -127,10 +127,12 @@ html, body, #root {
 }
 
 .scene-preview-svg {
-  width: 140px;
+  width: 100%;
   height: auto;
   border-radius: 10px;
   overflow: hidden;
+  display: block;
+  margin: auto 0;
 }
 
 /* ─── Game Screen ────────────────────────────────────────────── */
@@ -180,79 +182,93 @@ html, body, #root {
   justify-content: center;
 }
 
-/* ─── Die Panel ──────────────────────────────────────────────── */
-.die-panel {
-  background: linear-gradient(145deg, #FFFDE7, #FFF9C4);
-  border-radius: 20px;
-  padding: 16px 14px;
-  box-shadow:
-    6px 6px 0 #E6C800,
-    10px 10px 20px rgba(0,0,0,0.18);
-  transform: perspective(600px) rotateY(-6deg) rotateX(3deg);
-  width: 220px;
+/* ─── Dice Panel (3D) ────────────────────────────────────────── */
+.dice-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 16px;
 }
 
-.die-panel-label {
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #B8860B;
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+.dice-tray {
+  width: 110px;
+  height: 110px;
+  background: linear-gradient(135deg, #fff, #f7f7f2);
+  border: 3px dashed #ccc;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.die-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.dice-tray--active {
+  border-style: solid;
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(255,140,0,0.25);
 }
 
-.die-face {
+.dice-tray-prompt {
+  font-size: 2rem;
+  color: #ccc;
+  user-select: none;
+}
+
+.dice-scene {
+  perspective: 500px;
+  width: 120px;
+  height: 120px;
+  cursor: default;
+}
+
+.dice-scene--clickable {
+  cursor: pointer;
+}
+
+.dice-scene--clickable:hover {
+  outline: 3px solid rgba(255,140,0,0.4);
+  outline-offset: 6px;
+  border-radius: 8px;
+}
+
+.dice-cube {
+  width: 120px;
+  height: 120px;
   position: relative;
-  width: 88px;
-  height: 88px;
-  background: linear-gradient(135deg, #fff, #f5f5f0);
-  border: 2px solid #e0d080;
+  transform-style: preserve-3d;
+  transition: transform 0.95s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.dice-face3d {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #ffffff, #f0f0eb);
+  border: 2px solid #ddd;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 3px 3px 0 #c8b400, 4px 4px 8px rgba(0,0,0,0.1);
-  transition: transform 0.15s, box-shadow 0.15s;
-  cursor: grab;
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.06);
 }
 
-.die-face:not(.die-face--used):hover {
-  transform: translateY(-3px) scale(1.06);
-  box-shadow: 5px 5px 0 #c8b400, 6px 6px 12px rgba(0,0,0,0.16);
-}
+.dice-face3d--front  { transform: translateZ(60px); }
+.dice-face3d--back   { transform: rotateY(180deg) translateZ(60px); }
+.dice-face3d--right  { transform: rotateY(90deg)  translateZ(60px); }
+.dice-face3d--left   { transform: rotateY(-90deg) translateZ(60px); }
+.dice-face3d--top    { transform: rotateX(90deg)  translateZ(60px); }
+.dice-face3d--bottom { transform: rotateX(-90deg) translateZ(60px); }
 
-.die-face--used {
-  opacity: 0.35;
-  cursor: default;
-  background: #f5f5f5;
+.dice-hint {
+  font-size: 0.85rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  color: #888;
+  text-align: center;
 }
-
-.die-face-shape {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Die corner dots */
-.die-dot {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: #d4b800;
-  border-radius: 50%;
-  opacity: 0.5;
-}
-.die-dot--tl { top: 5px;    left: 5px;   }
-.die-dot--tr { top: 5px;    right: 5px;  }
-.die-dot--bl { bottom: 5px; left: 5px;   }
-.die-dot--br { bottom: 5px; right: 5px;  }
 
 /* ─── Draggable shape ────────────────────────────────────────── */
 .draggable-shape {
@@ -447,18 +463,39 @@ html, body, #root {
     padding: 8px 12px 12px;
   }
 
-  .die-panel {
-    transform: none;
-    width: 100%;
-    max-width: 340px;
+  .dice-panel {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
   }
 
-  .die-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .dice-cube {
+    width: 90px;
+    height: 90px;
   }
 
-  .die-face {
-    width: 70px;
-    height: 70px;
+  .dice-face3d {
+    width: 90px;
+    height: 90px;
+  }
+
+  .dice-face3d--front  { transform: translateZ(45px); }
+  .dice-face3d--back   { transform: rotateY(180deg) translateZ(45px); }
+  .dice-face3d--right  { transform: rotateY(90deg)  translateZ(45px); }
+  .dice-face3d--left   { transform: rotateY(-90deg) translateZ(45px); }
+  .dice-face3d--top    { transform: rotateX(90deg)  translateZ(45px); }
+  .dice-face3d--bottom { transform: rotateX(-90deg) translateZ(45px); }
+
+  .dice-scene {
+    perspective: 400px;
+    width: 90px;
+    height: 90px;
+  }
+
+  .dice-tray {
+    width: 90px;
+    height: 90px;
   }
 }

@@ -19,8 +19,10 @@ export default function App() {
         usedPieceIds={gameState.usedPieceIds}
         activeId={gameState.activeId}
         wrongSlotId={gameState.wrongSlotId}
+        currentDicePiece={gameState.currentDicePiece}
         handleDragStart={gameState.handleDragStart}
         handleDragEnd={gameState.handleDragEnd}
+        handleRoll={gameState.handleRoll}
         onBack={gameState.resetGame}
       />
     )

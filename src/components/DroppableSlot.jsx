@@ -22,24 +22,17 @@ export default function DroppableSlot({ slot, placedPiece, isWrong }) {
   const renderPlacedShape = () => {
     if (!placedPiece) return null
 
-    const rotation = slot.shapeRotation || 0
-
-    // For circle/semicircle slots: use cx/cy/r
+    // For circle/semicircle slots: fill the exact slot shape
     if (slot.cx !== undefined) {
-      const diameter = slot.r * 2
-      return (
-        <g
-          transform={`translate(${slot.cx}, ${slot.cy}) rotate(${rotation})`}
-          className="placed-shape"
-        >
-          <PlacedShapeSVG
-            type={placedPiece.type}
-            color={placedPiece.color}
-            size={diameter}
-            centered
-          />
-        </g>
-      )
+      const { cx, cy, r } = slot
+      if (slot.accepts === 'circle') {
+        return <circle cx={cx} cy={cy} r={r} fill={placedPiece.color} className="placed-shape" />
+      }
+      // semicircle: same path as renderOutline
+      if (slot.shapeRotation === 180) {
+        return <path d={`M ${cx - r},${cy} A ${r},${r} 0 0 0 ${cx + r},${cy} Z`} fill={placedPiece.color} className="placed-shape" />
+      }
+      return <path d={`M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy} Z`} fill={placedPiece.color} className="placed-shape" />
     }
 
     // For rect slots: fill the exact slot rectangle
@@ -127,55 +120,3 @@ export default function DroppableSlot({ slot, placedPiece, isWrong }) {
   )
 }
 
-// Helper: renders an SVG shape centered at origin (for placement inside <g transform>)
-function PlacedShapeSVG({ type, color, size, width, height, centered }) {
-  const w = width ?? size
-  const h = height ?? size
-  const cx = w / 2
-  const cy = h / 2
-
-  let el = null
-  switch (type) {
-    case 'circle':
-      el = <circle cx={0} cy={0} r={Math.min(cx, cy) * 0.88} fill={color} />
-      break
-    case 'triangle':
-      el = (
-        <polygon
-          points={`0,${-cy * 0.88} ${cx * 0.88},${cy * 0.88} ${-cx * 0.88},${cy * 0.88}`}
-          fill={color}
-        />
-      )
-      break
-    case 'parallelogram':
-      el = (
-        <polygon
-          points={`${-cx * 0.55},${cy * 0.82} ${cx * 0.82},${cy * 0.82} ${cx * 0.55},${-cy * 0.82} ${-cx * 0.82},${-cy * 0.82}`}
-          fill={color}
-        />
-      )
-      break
-    case 'semicircle':
-      el = (
-        <path
-          d={`M ${-cx * 0.88},0 A ${cx * 0.88},${cy * 0.88} 0 0 1 ${cx * 0.88},0 Z`}
-          fill={color}
-        />
-      )
-      break
-    case 'square':
-      el = <rect x={-cx * 0.85} y={-cy * 0.85} width={w * 0.85} height={h * 0.85} fill={color} />
-      break
-    case 'rectangle':
-      el = <rect x={-cx * 0.88} y={-cy * 0.65} width={w * 0.88} height={h * 0.65} fill={color} />
-      break
-    default:
-      return null
-  }
-
-  return (
-    <g className="placed-shape-inner">
-      {el}
-    </g>
-  )
-}

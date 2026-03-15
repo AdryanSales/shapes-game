@@ -21,34 +21,43 @@ export default function StartScreen({ onSelect }) {
   )
 }
 
+// Same viewBox as HouseScene (400x285), colors match SHAPE_COLORS
 function MiniHouse() {
   return (
-    <svg viewBox="0 0 120 110" className="scene-preview-svg">
-      <rect width="120" height="110" fill="#B3E5FC" rx="6" />
-      <rect y="90" width="120" height="20" fill="#81C784" />
-      <polygon points="60,8 15,52 105,52" fill="#F5C800" />
-      <rect x="15" y="52" width="90" height="50" fill="#1A9BB5" />
-      <rect x="22" y="60" width="26" height="26" fill="#B3E5FC" />
-      <rect x="72" y="60" width="26" height="26" fill="#B3E5FC" />
+    <svg viewBox="0 0 400 285" className="scene-preview-svg">
+      <rect width="400" height="285" fill="#ffffff" rx="6" />
+      {/* Roof left: parallelogram */}
+      <polygon points="20,155 260,155 320,15 80,15" fill="#7B3A1A" />
+      {/* Roof right: triangle */}
+      <polygon points="320,15 260,155 380,155" fill="#F5C800" />
+      {/* Body left: rectangle */}
+      <rect x="20" y="155" width="240" height="120" fill="#1A9BB5" />
+      {/* Body right: square */}
+      <rect x="260" y="155" width="120" height="120" fill="#2EB84B" />
     </svg>
   )
 }
 
+// Same viewBox as FaceScene (400x430), colors match SHAPE_COLORS
+// Semicircle directions match DroppableSlot rendering:
+//   shapeRotation !== 180 → sweep=1 → arc up (∩)
+//   shapeRotation === 180 → sweep=0 → arc down (∪)
 function MiniFace() {
   return (
-    <svg viewBox="0 0 120 130" className="scene-preview-svg">
-      <rect width="120" height="130" fill="#FFF9E6" rx="6" />
-      <ellipse cx="60" cy="68" rx="48" ry="58" fill="#FFE0B2" stroke="#FFCA28" strokeWidth="2.5" />
-      {/* brows */}
-      <path d="M 25,42 A 17,17 0 0 0 59,42 Z" fill="#3A3A3A" />
-      <path d="M 61,42 A 17,17 0 0 0 95,42 Z" fill="#3A3A3A" />
-      {/* eyes */}
-      <circle cx="42" cy="65" r="13" fill="#CC2E2E" />
-      <circle cx="78" cy="65" r="13" fill="#CC2E2E" />
-      {/* nose */}
-      <polygon points="60,82 51,100 69,100" fill="#F5C800" />
-      {/* mouth */}
-      <path d="M 35,112 A 25,25 0 0 0 85,112 Z" fill="#3A3A3A" />
+    <svg viewBox="0 0 400 430" className="scene-preview-svg">
+      <rect width="400" height="430" fill="#ffffff" rx="6" />
+      {/* Brow left: semicircle arc up (cx=120, cy=80, r=55) */}
+      <path d="M 65,80 A 55,55 0 0 1 175,80 Z" fill="#3A3A3A" />
+      {/* Brow right: semicircle arc up (cx=280, cy=80, r=55) */}
+      <path d="M 225,80 A 55,55 0 0 1 335,80 Z" fill="#3A3A3A" />
+      {/* Eye left: circle (cx=120, cy=160, r=55) */}
+      <circle cx="120" cy="160" r="55" fill="#CC2E2E" />
+      {/* Eye right: circle (cx=280, cy=160, r=55) */}
+      <circle cx="280" cy="160" r="55" fill="#CC2E2E" />
+      {/* Nose: triangle */}
+      <polygon points="200,210 130,310 270,310" fill="#F5C800" />
+      {/* Mouth: semicircle arc down (cx=200, cy=350, r=52) */}
+      <path d="M 148,350 A 52,52 0 0 0 252,350 Z" fill="#3A3A3A" />
     </svg>
   )
 }
