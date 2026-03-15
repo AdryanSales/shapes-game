@@ -13,6 +13,9 @@ export default function GameScreen({
   activeId,
   wrongSlotId,
   currentDicePiece,
+  currentPlayer,
+  canRoll,
+  turnMessage,
   handleDragStart,
   handleDragEnd,
   handleRoll,
@@ -34,9 +37,19 @@ export default function GameScreen({
       <div className="game-screen">
         <button className="back-button" onClick={onBack}><RiArrowGoBackLine /> Voltar</button>
         <div className="game-die-col">
+          <div className="player-indicator">
+            <div className={`player-tag ${currentPlayer === 0 ? 'player-tag--active' : ''}`}>
+              Jogador 1
+            </div>
+            <div className={`player-tag ${currentPlayer === 1 ? 'player-tag--active' : ''}`}>
+              Jogador 2
+            </div>
+          </div>
           <DicePanel
             currentDicePiece={currentDicePiece}
             onRoll={handleRoll}
+            gameCanRoll={canRoll}
+            turnMessage={turnMessage}
           />
         </div>
         <div className="game-scene-col">

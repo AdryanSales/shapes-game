@@ -36,12 +36,12 @@ function calcNextRotation(current, faceIndex) {
   return { x: current.x + diffX + 720, y: current.y + diffY + 720 }
 }
 
-export default function DicePanel({ currentDicePiece, onRoll }) {
+export default function DicePanel({ currentDicePiece, onRoll, gameCanRoll, turnMessage }) {
   const [rotation,  setRotation]  = useState({ x: -20, y: 30 })
   const [isRolling, setIsRolling] = useState(false)
 
   function handleRoll() {
-    if (isRolling) return
+    if (isRolling || !gameCanRoll) return
     const faceIndex = Math.floor(Math.random() * 6)
     setRotation(prev => calcNextRotation(prev, faceIndex))
     setIsRolling(true)
@@ -51,7 +51,17 @@ export default function DicePanel({ currentDicePiece, onRoll }) {
     }, 950)
   }
 
-  const canRoll = !isRolling
+  const canRoll = !isRolling && gameCanRoll
+
+  const hintText = turnMessage
+    ? turnMessage
+    : currentDicePiece
+    ? 'Arraste a forma!'
+    : isRolling
+    ? 'Rolando...'
+    : gameCanRoll
+    ? 'Clique no dado'
+    : 'Aguarde...'
 
   return (
     <div className="dice-panel">
@@ -84,8 +94,8 @@ export default function DicePanel({ currentDicePiece, onRoll }) {
         </div>
       </div>
 
-      <p className="dice-hint">
-        {currentDicePiece ? 'Arraste a forma!' : isRolling ? 'Rolando...' : 'Clique no dado'}
+      <p className={`dice-hint ${turnMessage ? 'dice-hint--alert' : ''}`}>
+        {hintText}
       </p>
     </div>
   )

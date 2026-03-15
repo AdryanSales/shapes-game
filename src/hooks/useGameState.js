@@ -9,6 +9,9 @@ export function useGameState() {
   const [activeId, setActiveId] = useState(null) // piece being dragged
   const [wrongSlotId, setWrongSlotId] = useState(null)
   const [currentDicePiece, setCurrentDicePiece] = useState(null)
+  const [currentPlayer, setCurrentPlayer] = useState(0) // 0 = Jogador 1, 1 = Jogador 2
+  const [canRoll, setCanRoll] = useState(true)
+  const [turnMessage, setTurnMessage] = useState(null)
 
   const currentScene = activeScene ? SCENES[activeScene] : null
 
@@ -24,6 +27,13 @@ export function useGameState() {
     }
   }, [isWon, phase])
 
+  const switchPlayer = useCallback(() => {
+    setCurrentPlayer(p => 1 - p)
+    setCanRoll(true)
+    setCurrentDicePiece(null)
+    setTurnMessage(null)
+  }, [])
+
   const selectScene = useCallback((sceneId) => {
     setActiveScene(sceneId)
     setPlacedShapes({})
@@ -31,6 +41,9 @@ export function useGameState() {
     setActiveId(null)
     setWrongSlotId(null)
     setCurrentDicePiece(null)
+    setCurrentPlayer(0)
+    setCanRoll(true)
+    setTurnMessage(null)
     setPhase('playing')
   }, [])
 
@@ -42,6 +55,9 @@ export function useGameState() {
     setActiveId(null)
     setWrongSlotId(null)
     setCurrentDicePiece(null)
+    setCurrentPlayer(0)
+    setCanRoll(true)
+    setTurnMessage(null)
   }, [])
 
   const handleRoll = useCallback((shapeType) => {
@@ -50,7 +66,13 @@ export function useGameState() {
       p => p.type === shapeType && !usedPieceIds.has(p.id)
     )
     setCurrentDicePiece(piece ?? null)
-  }, [currentScene, usedPieceIds])
+    setCanRoll(false)
+    if (!piece) {
+      // Shape can't be used in this scene/phase → pass turn
+      setTurnMessage('Forma indisponível! Passando a vez...')
+      setTimeout(() => switchPlayer(), 1800)
+    }
+  }, [currentScene, usedPieceIds, switchPlayer])
 
   const handleDragStart = useCallback(({ active }) => {
     setActiveId(active.id)
@@ -75,18 +97,22 @@ export function useGameState() {
     // Piece already placed
     if (usedPieceIds.has(pieceId)) return
 
-    // Wrong shape type
+    // Wrong shape type → player loses turn
     if (piece.type !== slot.accepts) {
       setWrongSlotId(slotId)
       setTimeout(() => setWrongSlotId(null), 600)
+      setCurrentDicePiece(null) // remove piece from tray immediately
+      setTurnMessage('Forma errada! Perdeu a vez...')
+      setTimeout(() => switchPlayer(), 1500)
       return
     }
 
-    // Success
+    // Correct placement → player keeps turn and can roll again
     setPlacedShapes(prev => ({ ...prev, [slotId]: pieceId }))
     setUsedPieceIds(prev => new Set([...prev, pieceId]))
     setCurrentDicePiece(null)
-  }, [currentScene, placedShapes, usedPieceIds])
+    setCanRoll(true)
+  }, [currentScene, placedShapes, usedPieceIds, switchPlayer])
 
   return {
     phase,
@@ -98,6 +124,9 @@ export function useGameState() {
     wrongSlotId,
     isWon,
     currentDicePiece,
+    currentPlayer,
+    canRoll,
+    turnMessage,
     selectScene,
     resetGame,
     handleDragStart,
