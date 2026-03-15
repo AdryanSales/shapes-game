@@ -35,13 +35,16 @@ function calcNextRotation(current, faceIndex) {
 }
 
 // Tray with drag applied directly so the whole area is the hit target
-function DraggableTray({ piece }) {
+const PLAYER_PULSE_COLORS = ['#2196F3', '#E53935']
+
+function DraggableTray({ piece, currentPlayer }) {
   const { setNodeRef, listeners, attributes, transform, isDragging } = useDraggable({
     id: piece.id,
   })
-  const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-    : undefined
+  const style = {
+    '--pulse-color': PLAYER_PULSE_COLORS[currentPlayer],
+    ...(transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : {}),
+  }
   return (
     <div
       ref={setNodeRef}
@@ -55,7 +58,7 @@ function DraggableTray({ piece }) {
   )
 }
 
-export default function DicePanel({ currentDicePiece, onRoll, gameCanRoll, turnMessage }) {
+export default function DicePanel({ currentDicePiece, onRoll, gameCanRoll, turnMessage, currentPlayer }) {
   const [rotation,  setRotation]  = useState({ x: -20, y: 30 })
   const [isRolling, setIsRolling] = useState(false)
 
@@ -84,7 +87,7 @@ export default function DicePanel({ currentDicePiece, onRoll, gameCanRoll, turnM
 
   return (
     <div className="dice-panel">
-      {currentDicePiece && <DraggableTray piece={currentDicePiece} />}
+      {currentDicePiece && <DraggableTray piece={currentDicePiece} currentPlayer={currentPlayer} />}
 
       <div
         className={`dice-scene ${canRoll ? 'dice-scene--clickable' : ''}`}

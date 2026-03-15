@@ -85,6 +85,7 @@ export default function GameScreen({
             onRoll={handleRoll}
             gameCanRoll={canRoll}
             turnMessage={turnMessage}
+            currentPlayer={currentPlayer}
           />
         </div>
 
