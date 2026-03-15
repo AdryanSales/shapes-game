@@ -145,15 +145,76 @@ html, body, #root {
 
 .game-scenes-row {
   display: flex;
-  gap: 10px;
+  flex-direction: row;
+  gap: 8px;
   width: 100%;
+  align-items: flex-start;
 }
 
-.game-scenes-row .scene-svg {
+/* ─── Scene Card (thumbnail + expand on hover) — mobile ─────── */
+.scene-card {
   flex: 1;
-  width: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: flex 0.3s ease;
+}
+
+.scene-card-title {
+  font-size: 0.68rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  color: #888;
+  padding: 2px 0 3px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scene-card .scene-svg {
+  width: 100%;
   height: auto;
-  max-height: 100%;
+  display: block;
+}
+
+/* Mobile: hover expands; dragging → overlay tela cheia */
+@media (max-width: 767px) {
+  .scene-card--hovered { flex: 4; }
+
+  /* Quando arrastando: scenes sobem como overlay cobrindo a tela */
+  .scene-card--dragging ~ .scene-card--dragging,
+  .scene-card--dragging {
+    /* layout gerenciado pelo pai abaixo */
+  }
+
+  /* Pai das scene-cards quando uma delas está em dragging */
+  .game-scenes-row:has(.scene-card--dragging) {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    flex-direction: column;
+    background: rgba(255, 248, 225, 0.97);
+    padding: 8px;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .game-scenes-row:has(.scene-card--dragging) .scene-card {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .game-scenes-row:has(.scene-card--dragging) .scene-card .scene-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .game-scenes-row:has(.scene-card--dragging) .scene-card-title {
+    font-size: 0.8rem;
+    color: #555;
+  }
 }
 
 /* Dice area */
@@ -276,15 +337,17 @@ html, body, #root {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0px 0px;
+  gap: 0 28px;
   padding: 0;
 }
 
 .dice-panel .dice-tray { margin-bottom: 0; }
 .dice-panel .dice-hint {
-  margin-top: 0;
+  order: -1;
   width: 100%;
   text-align: center;
+  font-size: 1.50rem;
+  margin-bottom: 50px;
 }
 
 .dice-tray {
@@ -620,7 +683,9 @@ html, body, #root {
 
   .game-scenes-row { gap: 16px; }
 
-  .game-scenes-row .scene-svg {
+  .scene-card { flex: 1; }
+  .scene-card .scene-svg {
+    width: 100%;
     max-height: calc(100vh - 48px);
   }
 
@@ -641,7 +706,13 @@ html, body, #root {
   }
 
   .dice-panel .dice-tray { margin-bottom: 20px; }
-  .dice-panel .dice-hint { margin-top: 50px; width: auto; }
+  .dice-panel .dice-hint {
+    order: 0;
+    margin-top: 50px;
+    margin-bottom: 0;
+    width: auto;
+    font-size: 0.82rem;
+  }
 
   /* Larger dice on desktop */
   .dice-tray     { width: 190px; height: 190px; border-radius: 18px; }

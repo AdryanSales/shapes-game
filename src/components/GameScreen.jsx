@@ -1,4 +1,5 @@
-import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragOverlay, MouseSensor, TouchSensor, useDndMonitor, useSensor, useSensors } from '@dnd-kit/core'
+import { useState } from 'react'
 // Centers the 72px overlay on the cursor regardless of the dragged element's size
 const OVERLAY_HALF = 36 // half of size={72} ShapeSVG
 function snapOverlayToCursor({ activatorEvent, draggingNodeRect, transform }) {
@@ -65,16 +66,20 @@ export default function GameScreen({
         {/* Scenes */}
         <div className="game-scenes-area">
           <div className="game-scenes-row">
-            <HouseScene
-              placedShapes={placedShapes}
-              placedBy={placedBy}
-              wrongSlotId={wrongSlotId}
-            />
-            <FaceScene
-              placedShapes={placedShapes}
-              placedBy={placedBy}
-              wrongSlotId={wrongSlotId}
-            />
+            <SceneCard title="Casa">
+              <HouseScene
+                placedShapes={placedShapes}
+                placedBy={placedBy}
+                wrongSlotId={wrongSlotId}
+              />
+            </SceneCard>
+            <SceneCard title="Rosto">
+              <FaceScene
+                placedShapes={placedShapes}
+                placedBy={placedBy}
+                wrongSlotId={wrongSlotId}
+              />
+            </SceneCard>
           </div>
         </div>
 
@@ -102,6 +107,32 @@ export default function GameScreen({
         ) : null}
       </DragOverlay>
     </DndContext>
+  )
+}
+
+function SceneCard({ title, children }) {
+  const [hovered, setHovered] = useState(false)
+  const [dragging, setDragging] = useState(false)
+
+  useDndMonitor({
+    onDragStart: () => setDragging(true),
+    onDragEnd:   () => setDragging(false),
+    onDragCancel:() => setDragging(false),
+  })
+
+  const cls = ['scene-card',
+    hovered  ? 'scene-card--hovered'  : '',
+    dragging ? 'scene-card--dragging' : '',
+  ].filter(Boolean).join(' ')
+
+  return (
+    <div className={cls}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span className="scene-card-title">{title}</span>
+      {children}
+    </div>
   )
 }
 
