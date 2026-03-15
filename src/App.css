@@ -1,0 +1,464 @@
+/* ─── Reset & base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #FFF8E1;
+  --primary:     #FF8C00;
+  --primary-dk:  #E07600;
+  --accent:      #7B1FA2;
+  --text:        #333;
+  --radius:      16px;
+  --font:        'Fredoka One', 'Nunito', sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* ─── Start Screen ───────────────────────────────────────────── */
+.start-screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+  background: linear-gradient(160deg, #FFF8E1 0%, #FFE082 100%);
+}
+
+.start-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--primary);
+  text-shadow: 3px 3px 0 #fff, 4px 4px 0 rgba(0,0,0,0.1);
+  letter-spacing: 1px;
+}
+
+.start-subtitle {
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+  color: #666;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+.start-die-preview {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.start-die-face {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #fffde7, #fff9c4);
+  border: 2px solid #ffe082;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 #e6c800, 3px 3px 6px rgba(0,0,0,0.1);
+}
+
+.start-choose {
+  font-size: 1.25rem;
+  color: var(--accent);
+  font-family: 'Nunito', sans-serif;
+}
+
+.scene-cards {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.scene-card {
+  width: 200px;
+  padding: 18px 14px 14px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.18s, box-shadow 0.18s;
+  font-family: var(--font);
+}
+
+.scene-card--house {
+  background: linear-gradient(135deg, #B3E5FC, #81D4FA);
+  box-shadow: 0 6px 0 #039BE5, 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.scene-card--face {
+  background: linear-gradient(135deg, #FFE0B2, #FFCA28);
+  box-shadow: 0 6px 0 #F9A825, 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.scene-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 10px 0 #0288D1, 0 14px 24px rgba(0,0,0,0.18);
+}
+
+.scene-card--face:hover {
+  box-shadow: 0 10px 0 #F57F17, 0 14px 24px rgba(0,0,0,0.18);
+}
+
+.scene-card:active {
+  transform: translateY(2px);
+}
+
+.scene-card-emoji {
+  font-size: 2.4rem;
+}
+
+.scene-card-label {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.scene-preview-svg {
+  width: 140px;
+  height: auto;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ─── Game Screen ────────────────────────────────────────────── */
+.game-screen {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 0;
+  background: linear-gradient(160deg, #FFF8E1 0%, #FFF3CD 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-family: Nunito, sans-serif;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.back-button:hover {
+  background: #f0f0f0;
+  border-color: #bbb;
+}
+
+.game-die-col {
+  padding: 20px 12px 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-scene-col {
+  padding: 16px 20px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Die Panel ──────────────────────────────────────────────── */
+.die-panel {
+  background: linear-gradient(145deg, #FFFDE7, #FFF9C4);
+  border-radius: 20px;
+  padding: 16px 14px;
+  box-shadow:
+    6px 6px 0 #E6C800,
+    10px 10px 20px rgba(0,0,0,0.18);
+  transform: perspective(600px) rotateY(-6deg) rotateX(3deg);
+  width: 220px;
+}
+
+.die-panel-label {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #B8860B;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.die-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.die-face {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, #fff, #f5f5f0);
+  border: 2px solid #e0d080;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0 #c8b400, 4px 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: grab;
+}
+
+.die-face:not(.die-face--used):hover {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 5px 5px 0 #c8b400, 6px 6px 12px rgba(0,0,0,0.16);
+}
+
+.die-face--used {
+  opacity: 0.35;
+  cursor: default;
+  background: #f5f5f5;
+}
+
+.die-face-shape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Die corner dots */
+.die-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #d4b800;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+.die-dot--tl { top: 5px;    left: 5px;   }
+.die-dot--tr { top: 5px;    right: 5px;  }
+.die-dot--bl { bottom: 5px; left: 5px;   }
+.die-dot--br { bottom: 5px; right: 5px;  }
+
+/* ─── Draggable shape ────────────────────────────────────────── */
+.draggable-shape {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.draggable-shape.is-dragging {
+  opacity: 0.25;
+  cursor: grabbing;
+}
+
+.draggable-shape.is-used {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ─── Drag overlay ───────────────────────────────────────────── */
+.drag-overlay-shape {
+  cursor: grabbing;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+  transform: scale(1.12);
+  pointer-events: none;
+}
+
+/* ─── Scene SVG ──────────────────────────────────────────────── */
+.scene-svg {
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 32px);
+  border-radius: 20px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.15);
+  overflow: visible;
+}
+
+/* ─── Drop slot animations ───────────────────────────────────── */
+.drop-slot .placed-shape-inner {
+  animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
+
+.drop-slot.wrong {
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-10px); }
+  35%       { transform: translateX(10px); }
+  55%       { transform: translateX(-7px); }
+  75%       { transform: translateX(7px); }
+}
+
+/* ─── Congratulations Screen ─────────────────────────────────── */
+.congrats-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.congrats-screen.congrats-visible {
+  opacity: 1;
+}
+
+.confetti-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  animation: confetti-fall linear infinite both;
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(-20px) translateX(0) rotate(0deg);   opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) translateX(var(--drift)) rotate(540deg); opacity: 0; }
+}
+
+.congrats-card {
+  position: relative;
+  background: white;
+  border-radius: 28px;
+  padding: 40px 50px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: card-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  max-width: 380px;
+  width: 90%;
+}
+
+@keyframes card-bounce {
+  0%   { transform: scale(0.5) translateY(40px); opacity: 0; }
+  100% { transform: scale(1) translateY(0);       opacity: 1; }
+}
+
+.congrats-trophy {
+  font-size: 4rem;
+  animation: trophy-spin 1s ease 0.3s both;
+}
+
+@keyframes trophy-spin {
+  0%   { transform: rotate(-20deg) scale(0.8); }
+  50%  { transform: rotate(10deg) scale(1.15); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.congrats-title {
+  font-size: 2.6rem;
+  color: var(--primary);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.08);
+}
+
+.congrats-subtitle {
+  font-size: 1.1rem;
+  font-family: 'Nunito', sans-serif;
+  color: #555;
+}
+
+.congrats-stars {
+  font-size: 2rem;
+  letter-spacing: 4px;
+  animation: stars-pop 0.6s ease 0.6s both;
+}
+
+@keyframes stars-pop {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.congrats-btn {
+  margin-top: 8px;
+  padding: 14px 30px;
+  font-size: 1.15rem;
+  font-family: var(--font);
+  font-weight: 800;
+  color: white;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--primary-dk), 0 8px 16px rgba(255,140,0,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.congrats-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 var(--primary-dk), 0 12px 20px rgba(255,140,0,0.35);
+}
+
+.congrats-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--primary-dk);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .game-screen {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow-y: auto;
+  }
+
+  .game-die-col {
+    padding: 12px 12px 0;
+  }
+
+  .game-scene-col {
+    padding: 8px 12px 12px;
+  }
+
+  .die-panel {
+    transform: none;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .die-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .die-face {
+    width: 70px;
+    height: 70px;
+  }
+}
