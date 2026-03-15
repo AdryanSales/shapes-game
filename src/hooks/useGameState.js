@@ -1,24 +1,33 @@
 import { useState, useEffect, useCallback } from 'react'
 import { SCENES } from '../data/scenes.js'
 
+// Combined pieces and slots from both scenes
+const ALL_PIECES    = [...SCENES.house.pieces, ...SCENES.face.pieces]
+const ALL_SLOTS     = [...SCENES.house.slots,  ...SCENES.face.slots]
+const HOUSE_SLOT_IDS = new Set(SCENES.house.slots.map(s => s.id))
+const FACE_SLOT_IDS  = new Set(SCENES.face.slots.map(s => s.id))
+
 export function useGameState() {
   const [phase, setPhase] = useState('start') // 'start' | 'playing' | 'congrats'
-  const [activeScene, setActiveScene] = useState(null)
   const [placedShapes, setPlacedShapes] = useState({}) // { slotId: pieceId }
+  const [placedBy, setPlacedBy] = useState({})         // { slotId: 0|1 }
+  const [completedBy, setCompletedBy] = useState({ house: null, face: null }) // who completed each drawing
   const [usedPieceIds, setUsedPieceIds] = useState(new Set())
-  const [activeId, setActiveId] = useState(null) // piece being dragged
+  const [activeId, setActiveId] = useState(null)
   const [wrongSlotId, setWrongSlotId] = useState(null)
   const [currentDicePiece, setCurrentDicePiece] = useState(null)
   const [currentPlayer, setCurrentPlayer] = useState(0) // 0 = Jogador 1, 1 = Jogador 2
   const [canRoll, setCanRoll] = useState(true)
   const [turnMessage, setTurnMessage] = useState(null)
 
-  const currentScene = activeScene ? SCENES[activeScene] : null
+  // Win detection: all slots from both scenes filled
+  const isWon = ALL_SLOTS.every(slot => placedShapes[slot.id] != null)
 
-  // Win detection
-  const isWon = currentScene
-    ? currentScene.slots.every(slot => placedShapes[slot.id] != null)
-    : false
+  // Scores: 1 point per drawing completed (max 2)
+  const scores = [
+    (completedBy.house === 0 ? 1 : 0) + (completedBy.face === 0 ? 1 : 0),
+    (completedBy.house === 1 ? 1 : 0) + (completedBy.face === 1 ? 1 : 0),
+  ]
 
   useEffect(() => {
     if (isWon && phase === 'playing') {
@@ -34,9 +43,10 @@ export function useGameState() {
     setTurnMessage(null)
   }, [])
 
-  const selectScene = useCallback((sceneId) => {
-    setActiveScene(sceneId)
+  const startGame = useCallback(() => {
     setPlacedShapes({})
+    setPlacedBy({})
+    setCompletedBy({ house: null, face: null })
     setUsedPieceIds(new Set())
     setActiveId(null)
     setWrongSlotId(null)
@@ -49,8 +59,9 @@ export function useGameState() {
 
   const resetGame = useCallback(() => {
     setPhase('start')
-    setActiveScene(null)
     setPlacedShapes({})
+    setPlacedBy({})
+    setCompletedBy({ house: null, face: null })
     setUsedPieceIds(new Set())
     setActiveId(null)
     setWrongSlotId(null)
@@ -61,18 +72,16 @@ export function useGameState() {
   }, [])
 
   const handleRoll = useCallback((shapeType) => {
-    if (!currentScene) return
-    const piece = currentScene.pieces.find(
+    const piece = ALL_PIECES.find(
       p => p.type === shapeType && !usedPieceIds.has(p.id)
     )
     setCurrentDicePiece(piece ?? null)
     setCanRoll(false)
     if (!piece) {
-      // Shape can't be used in this scene/phase → pass turn
       setTurnMessage('Forma indisponível! Passando a vez...')
       setTimeout(() => switchPlayer(), 1800)
     }
-  }, [currentScene, usedPieceIds, switchPlayer])
+  }, [usedPieceIds, switchPlayer])
 
   const handleDragStart = useCallback(({ active }) => {
     setActiveId(active.id)
@@ -81,44 +90,53 @@ export function useGameState() {
   const handleDragEnd = useCallback(({ active, over }) => {
     setActiveId(null)
 
-    if (!over || !currentScene) return
+    if (!over) return
 
     const pieceId = active.id
-    const slotId = over.id
+    const slotId  = over.id
 
-    const piece = currentScene.pieces.find(p => p.id === pieceId)
-    const slot = currentScene.slots.find(s => s.id === slotId)
+    const piece = ALL_PIECES.find(p => p.id === pieceId)
+    const slot  = ALL_SLOTS.find(s => s.id === slotId)
 
     if (!piece || !slot) return
-
-    // Slot already filled
     if (placedShapes[slotId]) return
-
-    // Piece already placed
     if (usedPieceIds.has(pieceId)) return
 
     // Wrong shape type → player loses turn
     if (piece.type !== slot.accepts) {
       setWrongSlotId(slotId)
       setTimeout(() => setWrongSlotId(null), 600)
-      setCurrentDicePiece(null) // remove piece from tray immediately
+      setCurrentDicePiece(null)
       setTurnMessage('Forma errada! Perdeu a vez...')
       setTimeout(() => switchPlayer(), 1500)
       return
     }
 
-    // Correct placement → player keeps turn and can roll again
-    setPlacedShapes(prev => ({ ...prev, [slotId]: pieceId }))
+    // Correct placement
+    const newPlacedShapes = { ...placedShapes, [slotId]: pieceId }
+    setPlacedShapes(newPlacedShapes)
+    setPlacedBy(prev => ({ ...prev, [slotId]: currentPlayer }))
     setUsedPieceIds(prev => new Set([...prev, pieceId]))
     setCurrentDicePiece(null)
     setCanRoll(true)
-  }, [currentScene, placedShapes, usedPieceIds, switchPlayer])
+
+    // Check if this piece completed a drawing
+    const houseNowDone = [...HOUSE_SLOT_IDS].every(id => newPlacedShapes[id] != null)
+    const faceNowDone  = [...FACE_SLOT_IDS].every(id => newPlacedShapes[id] != null)
+    setCompletedBy(prev => {
+      const next = { ...prev }
+      if (houseNowDone && prev.house === null) next.house = currentPlayer
+      if (faceNowDone  && prev.face  === null) next.face  = currentPlayer
+      return next
+    })
+  }, [placedShapes, usedPieceIds, currentPlayer, switchPlayer])
 
   return {
     phase,
-    activeScene,
-    currentScene,
     placedShapes,
+    placedBy,
+    completedBy,
+    scores,
     usedPieceIds,
     activeId,
     wrongSlotId,
@@ -127,7 +145,7 @@ export function useGameState() {
     currentPlayer,
     canRoll,
     turnMessage,
-    selectScene,
+    startGame,
     resetGame,
     handleDragStart,
     handleDragEnd,

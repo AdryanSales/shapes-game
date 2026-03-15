@@ -1,15 +1,18 @@
 import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { RiArrowGoBackLine } from 'react-icons/ri'
+import { SCENES } from '../data/scenes.js'
 import DicePanel from './DicePanel.jsx'
 import HouseScene from './HouseScene.jsx'
 import FaceScene from './FaceScene.jsx'
 import ShapeSVG from './ShapeSVG.jsx'
 
+const ALL_PIECES = [...SCENES.house.pieces, ...SCENES.face.pieces]
+
 export default function GameScreen({
-  activeScene,
-  currentScene,
   placedShapes,
-  usedPieceIds,
+  placedBy,
+  completedBy,
+  scores,
   activeId,
   wrongSlotId,
   currentDicePiece,
@@ -27,24 +30,19 @@ export default function GameScreen({
   )
 
   const activePiece = activeId
-    ? currentScene.pieces.find(p => p.id === activeId)
+    ? ALL_PIECES.find(p => p.id === activeId)
     : null
-
-  const SceneComponent = activeScene === 'house' ? HouseScene : FaceScene
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="game-screen">
         <button className="back-button" onClick={onBack}><RiArrowGoBackLine /> Voltar</button>
         <div className="game-die-col">
-          <div className="player-indicator">
-            <div className={`player-tag ${currentPlayer === 0 ? 'player-tag--active' : ''}`}>
-              Jogador 1
-            </div>
-            <div className={`player-tag ${currentPlayer === 1 ? 'player-tag--active' : ''}`}>
-              Jogador 2
-            </div>
-          </div>
+          <Scoreboard
+            currentPlayer={currentPlayer}
+            scores={scores}
+            completedBy={completedBy}
+          />
           <DicePanel
             currentDicePiece={currentDicePiece}
             onRoll={handleRoll}
@@ -53,12 +51,18 @@ export default function GameScreen({
           />
         </div>
         <div className="game-scene-col">
-          <SceneComponent
-            placedShapes={placedShapes}
-            usedPieceIds={usedPieceIds}
-            wrongSlotId={wrongSlotId}
-            currentScene={currentScene}
-          />
+          <div className="game-scenes-row">
+            <HouseScene
+              placedShapes={placedShapes}
+              placedBy={placedBy}
+              wrongSlotId={wrongSlotId}
+            />
+            <FaceScene
+              placedShapes={placedShapes}
+              placedBy={placedBy}
+              wrongSlotId={wrongSlotId}
+            />
+          </div>
         </div>
       </div>
 
@@ -74,5 +78,31 @@ export default function GameScreen({
         ) : null}
       </DragOverlay>
     </DndContext>
+  )
+}
+
+function Scoreboard({ currentPlayer, scores, completedBy }) {
+  return (
+    <div className="scoreboard">
+      <PlayerCard player={0} score={scores[0]} completedBy={completedBy} isActive={currentPlayer === 0} />
+      <PlayerCard player={1} score={scores[1]} completedBy={completedBy} isActive={currentPlayer === 1} />
+    </div>
+  )
+}
+
+function PlayerCard({ player, score, completedBy, isActive }) {
+  const houseByMe = completedBy.house === player
+  const faceByMe  = completedBy.face  === player
+  return (
+    <div className={`player-card player-card--p${player + 1} ${isActive ? 'player-card--active' : ''}`}>
+      <div className="player-card-top">
+        <span className="player-card-name">J{player + 1}</span>
+        <span className="player-card-score">{score}</span>
+      </div>
+      <div className="player-card-drawings">
+        <span className={`drawing-chip ${houseByMe ? 'drawing-chip--done' : ''}`}>Casa</span>
+        <span className={`drawing-chip ${faceByMe  ? 'drawing-chip--done' : ''}`}>Rosto</span>
+      </div>
+    </div>
   )
 }

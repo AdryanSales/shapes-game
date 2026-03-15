@@ -7,16 +7,16 @@ export default function App() {
   const gameState = useGameState()
 
   if (gameState.phase === 'start') {
-    return <StartScreen onSelect={gameState.selectScene} />
+    return <StartScreen onStart={gameState.startGame} />
   }
 
   if (gameState.phase === 'playing') {
     return (
       <GameScreen
-        activeScene={gameState.activeScene}
-        currentScene={gameState.currentScene}
         placedShapes={gameState.placedShapes}
-        usedPieceIds={gameState.usedPieceIds}
+        placedBy={gameState.placedBy}
+        completedBy={gameState.completedBy}
+        scores={gameState.scores}
         activeId={gameState.activeId}
         wrongSlotId={gameState.wrongSlotId}
         currentDicePiece={gameState.currentDicePiece}
@@ -32,12 +32,7 @@ export default function App() {
   }
 
   if (gameState.phase === 'congrats') {
-    return (
-      <CongratsScreen
-        activeScene={gameState.activeScene}
-        onBack={gameState.resetGame}
-      />
-    )
+    return <CongratsScreen scores={gameState.scores} completedBy={gameState.completedBy} onBack={gameState.resetGame} />
   }
 
   return null
