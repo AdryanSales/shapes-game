@@ -79,7 +79,7 @@ export function useGameState() {
     setCanRoll(false)
     if (!piece) {
       setTurnMessage('Forma indisponível! Passando a vez...')
-      setTimeout(() => switchPlayer(), 1800)
+      setTimeout(() => switchPlayer(), 900)
     }
   }, [usedPieceIds, switchPlayer])
 
@@ -108,7 +108,7 @@ export function useGameState() {
       setTimeout(() => setWrongSlotId(null), 600)
       setCurrentDicePiece(null)
       setTurnMessage('Forma errada! Perdeu a vez...')
-      setTimeout(() => switchPlayer(), 1500)
+      setTimeout(() => switchPlayer(), 800)
       return
     }
 

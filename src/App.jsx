@@ -3,7 +3,16 @@ import StartScreen from './components/StartScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
 import CongratsScreen from './components/CongratsScreen.jsx'
 
+const DEV_CONGRATS = import.meta.env.DEV && window.location.hash === '#congrats'
+
+const MOCK_SCORES      = [3, 5]
+const MOCK_COMPLETED_BY = { house: 1, face: 0 }
+
 export default function App() {
+  if (DEV_CONGRATS) {
+    return <CongratsScreen scores={MOCK_SCORES} completedBy={MOCK_COMPLETED_BY} onBack={() => {}} />
+  }
+
   const gameState = useGameState()
 
   if (gameState.phase === 'start') {

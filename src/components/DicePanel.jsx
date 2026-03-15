@@ -1,19 +1,17 @@
 import { useState } from 'react'
-import DraggableShape from './DraggableShape.jsx'
+import { useDraggable } from '@dnd-kit/core'
 import ShapeSVG from './ShapeSVG.jsx'
 
-// Order matches CSS: front, back, right, left, top, bottom
 const DICE_FACES  = ['circle', 'triangle', 'parallelogram', 'semicircle', 'square', 'rectangle']
 const FACE_SIDES  = ['front',  'back',     'right',         'left',       'top',    'bottom']
 
-// Cube rotation (rotateX, rotateY in deg) that brings each face toward the viewer (+Z)
 const FACE_ROTATIONS = [
-  { x:   0, y:   0 }, // front  → circle
-  { x:   0, y: 180 }, // back   → triangle
-  { x:   0, y: -90 }, // right  → parallelogram
-  { x:   0, y:  90 }, // left   → semicircle
-  { x: -90, y:   0 }, // top    → square
-  { x:  90, y:   0 }, // bottom → rectangle
+  { x:   0, y:   0 },
+  { x:   0, y: 180 },
+  { x:   0, y: -90 },
+  { x:   0, y:  90 },
+  { x: -90, y:   0 },
+  { x:  90, y:   0 },
 ]
 
 const FACE_COLORS = {
@@ -26,14 +24,35 @@ const FACE_COLORS = {
 }
 
 function calcNextRotation(current, faceIndex) {
-  const target  = FACE_ROTATIONS[faceIndex]
-  const normX   = ((current.x % 360) + 360) % 360
-  const normY   = ((current.y % 360) + 360) % 360
-  const tNormX  = ((target.x  % 360) + 360) % 360
-  const tNormY  = ((target.y  % 360) + 360) % 360
-  const diffX   = ((tNormX - normX) + 360) % 360
-  const diffY   = ((tNormY - normY) + 360) % 360
+  const target = FACE_ROTATIONS[faceIndex]
+  const normX  = ((current.x % 360) + 360) % 360
+  const normY  = ((current.y % 360) + 360) % 360
+  const tNormX = ((target.x  % 360) + 360) % 360
+  const tNormY = ((target.y  % 360) + 360) % 360
+  const diffX  = ((tNormX - normX) + 360) % 360
+  const diffY  = ((tNormY - normY) + 360) % 360
   return { x: current.x + diffX + 720, y: current.y + diffY + 720 }
+}
+
+// Tray with drag applied directly so the whole area is the hit target
+function DraggableTray({ piece }) {
+  const { setNodeRef, listeners, attributes, transform, isDragging } = useDraggable({
+    id: piece.id,
+  })
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`dice-tray dice-tray--active ${isDragging ? 'dice-tray--dragging' : ''}`}
+      {...listeners}
+      {...attributes}
+    >
+      <ShapeSVG type={piece.type} color={piece.color} size={84} />
+    </div>
+  )
 }
 
 export default function DicePanel({ currentDicePiece, onRoll, gameCanRoll, turnMessage }) {
@@ -65,18 +84,8 @@ export default function DicePanel({ currentDicePiece, onRoll, gameCanRoll, turnM
 
   return (
     <div className="dice-panel">
-      {/* Tray — shows the piece rolled from the dice */}
-      <div className={`dice-tray ${currentDicePiece ? 'dice-tray--active' : ''}`}>
-        {currentDicePiece ? (
-          <DraggableShape piece={currentDicePiece} size={64} />
-        ) : (
-          <span className="dice-tray-prompt">
-            {isRolling ? '...' : '?'}
-          </span>
-        )}
-      </div>
+      {currentDicePiece && <DraggableTray piece={currentDicePiece} />}
 
-      {/* 3D Dice */}
       <div
         className={`dice-scene ${canRoll ? 'dice-scene--clickable' : ''}`}
         onClick={handleRoll}

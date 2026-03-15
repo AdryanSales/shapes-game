@@ -1,4 +1,20 @@
 import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+// Centers the 72px overlay on the cursor regardless of the dragged element's size
+const OVERLAY_HALF = 36 // half of size={72} ShapeSVG
+function snapOverlayToCursor({ activatorEvent, draggingNodeRect, transform }) {
+  if (!activatorEvent || !draggingNodeRect) return transform
+  const cx = 'clientX' in activatorEvent
+    ? activatorEvent.clientX
+    : activatorEvent.touches?.[0]?.clientX ?? 0
+  const cy = 'clientY' in activatorEvent
+    ? activatorEvent.clientY
+    : activatorEvent.touches?.[0]?.clientY ?? 0
+  return {
+    ...transform,
+    x: transform.x + cx - draggingNodeRect.left - OVERLAY_HALF,
+    y: transform.y + cy - draggingNodeRect.top  - OVERLAY_HALF,
+  }
+}
 import { RiArrowGoBackLine } from 'react-icons/ri'
 import { SCENES } from '../data/scenes.js'
 import DicePanel from './DicePanel.jsx'
@@ -36,21 +52,18 @@ export default function GameScreen({
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="game-screen">
-        <button className="back-button" onClick={onBack}><RiArrowGoBackLine /> Voltar</button>
-        <div className="game-die-col">
+
+        {/* Scoreboard */}
+        <div className="game-header">
           <Scoreboard
             currentPlayer={currentPlayer}
             scores={scores}
             completedBy={completedBy}
           />
-          <DicePanel
-            currentDicePiece={currentDicePiece}
-            onRoll={handleRoll}
-            gameCanRoll={canRoll}
-            turnMessage={turnMessage}
-          />
         </div>
-        <div className="game-scene-col">
+
+        {/* Scenes */}
+        <div className="game-scenes-area">
           <div className="game-scenes-row">
             <HouseScene
               placedShapes={placedShapes}
@@ -64,16 +77,26 @@ export default function GameScreen({
             />
           </div>
         </div>
+
+        {/* Dice */}
+        <div className="game-dice-area">
+          <DicePanel
+            currentDicePiece={currentDicePiece}
+            onRoll={handleRoll}
+            gameCanRoll={canRoll}
+            turnMessage={turnMessage}
+          />
+        </div>
+
+        <button className="back-button" onClick={onBack}>
+          <RiArrowGoBackLine /> Voltar
+        </button>
       </div>
 
-      <DragOverlay dropAnimation={null}>
+      <DragOverlay dropAnimation={null} modifiers={[snapOverlayToCursor]}>
         {activePiece ? (
           <div className="drag-overlay-shape">
-            <ShapeSVG
-              type={activePiece.type}
-              color={activePiece.color}
-              size={72}
-            />
+            <ShapeSVG type={activePiece.type} color={activePiece.color} size={72} />
           </div>
         ) : null}
       </DragOverlay>
@@ -96,9 +119,9 @@ function PlayerCard({ player, score, completedBy, isActive }) {
   return (
     <div className={`player-card player-card--p${player + 1} ${isActive ? 'player-card--active' : ''}`}>
       <div className="player-card-top">
-        <span className="player-card-name">J{player + 1}</span>
-        <span className="player-card-score">{score}</span>
+        <span className="player-card-name">Jogador {player + 1}</span>
       </div>
+      <span className="player-card-score">{score}</span>
       <div className="player-card-drawings">
         <span className={`drawing-chip ${houseByMe ? 'drawing-chip--done' : ''}`}>Casa</span>
         <span className={`drawing-chip ${faceByMe  ? 'drawing-chip--done' : ''}`}>Rosto</span>
